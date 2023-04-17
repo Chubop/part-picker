@@ -4,7 +4,10 @@
 // - mobile-first
 // four columns: component, part, merchant, price
 
-import { Button, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
+import { Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
+import AddPartModal from "./AddPartModal";
+import { getComponentsByType } from "./GridHelpers";
 
 // Create our number formatter.
 const formatter = new Intl.NumberFormat('en-US', {
@@ -16,7 +19,6 @@ const formatter = new Intl.NumberFormat('en-US', {
     //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
   });
   
-  console.log(formatter.format(2500)); /* $2,500.00 */
 
 export default function PartGrid(props){
 
@@ -27,13 +29,13 @@ export default function PartGrid(props){
         price,
       ) {
         return { component, part, merchant, price };
-      }
+    }
 
     const rows = [
-        createData("Lower Parts Kit", false, false, false),
+        createData("Stripped Lower", false, false, false),
         createData("Trigger", false, false, false),
         createData("Buffer Kit", false, false, false),
-        createData("Stock", "Magpull UBL Stock", "Smith & Wesson", 189.50),
+        createData("Stock", false, false, false),
         createData("Pistol Grip", false, false, false),
         createData("Stripped Upper", false, false, false),
         createData("Forward Assist", false, false, false),
@@ -43,10 +45,35 @@ export default function PartGrid(props){
         createData("Gas Tube", false, false, false),
         createData("Gas Block", false, false, false),
         createData("BCG", false, false, false),
-        createData("Charging Handle", false, false, false)
+        createData("Charging Handle", false, false, false),
+        createData("Attachments", false, false, false),
     ]
 
+    const [loadingPart, setLoadingPart] = useState(false);
+    const [category, setCategory] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [componentRowData, setComponentRowData] = useState([]);
+
+
+    async function handleAddPart(component){
+        setLoadingPart(true);
+        setIsModalOpen(true);
+        let rows = await getComponentsByType(component.replace(" ", "_").toLowerCase());
+        setLoadingPart(false);
+        setComponentRowData(rows)
+        console.log(rows);
+        setCategory(component);
+        console.log(component);
+    }
+
     return(
+        <>
+        <AddPartModal 
+        loading={loadingPart} 
+        isOpen={isModalOpen} 
+        category={category} 
+        rows={componentRowData}
+        onClose={() => setIsModalOpen(false)}/>
         <TableContainer component={Paper}>
             <Table sx={{minWidth: 650}} aria-label="main table">
                 <TableHead>
@@ -64,10 +91,16 @@ export default function PartGrid(props){
                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                         >
                             <TableCell component={"th"} scope="row">
-                                {row.component}
+                                <Typography variant="h6">
+                                    {row.component}
+                                </Typography>
                             </TableCell>
                             <TableCell align="right">
-                                {!row.part ? (<Button variant="outlined" sx={{textTransform: 'none'}}>+ Add {row.component}</Button>) : (<b>{row.part}</b>)}
+                                {!row.part ? (
+                                <Button variant="outlined" sx={{textTransform: 'none'}} onClick={() => handleAddPart(row.component)}>
+                                    + Add {row.component}
+                                </Button>
+                                ) : (<b>{row.part}</b>)}
                             </TableCell>
                             <TableCell align="right">
                                 {row.merchant}
@@ -80,5 +113,6 @@ export default function PartGrid(props){
                 </TableBody>
             </Table>
         </TableContainer>
+        </>
     )
 }
