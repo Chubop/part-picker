@@ -1,6 +1,7 @@
 // multiple tabs, top part with the logo aligned on the left side with margin
 
 import { AppBar, Box, Button, Container, Menu, MenuItem, Toolbar, Typography } from "@mui/material";
+import { Link } from "react-router-dom";
 
 export default function NavBar(props){
 
@@ -24,17 +25,20 @@ export default function NavBar(props){
                         textDecoration: 'none',
                         }}
                     >
-                        Part Picker
+                        AR Part Picker
                     </Typography>
                     <Box sx={{ flexGrow: 1, display: 'flex'}}>
-                        {['Builder', 'Search'].map((page) => {
+                        {['Builder', 'Search', 'Upload'].map((page) => {
                             return(
+
+                            <Link to={"/" + page.toLowerCase()}>
                                 <Button key={page}
                                 sx={{color: 'white'}}>
                                     <Typography variant="h7">
-                                    {page}
+                                        {page}
                                     </Typography>
                                 </Button>
+                            </Link>
                             )
                         })}
                     </Box>
